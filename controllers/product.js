@@ -194,7 +194,9 @@ exports.getAllProducts = (req, res) => {
   let limit = req.query.limit ? parseInt(req.query.limit) : 8;
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
 
-  Product.find()
+  Product.find({
+    $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
+  })
     .select("-photo")
     .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
@@ -216,11 +218,12 @@ exports.getAllProductsByCity = (req, res) => {
 
   // { "bid.status":{$ne:"Accepted"}
   Product.find({
-    city: req.params.cityName,
-    $or: [
-      { bid: { $elemMatch: { status: { $ne: "accepted" } } } },
-      { bid: { $size: 0 } }
-    ]
+    $and: [
+      { city: req.params.cityName },
+      {
+        $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
+      },
+    ],
   })
     .select("-photo")
     .populate("category", "name _id")
@@ -243,9 +246,12 @@ exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
   Product.find({
     city: req.params.cityName,
     subCategoryName: req.params.subCategoryName,
-    $or: [
-      { bid: { $elemMatch: { status: { $ne: "Accepted" } } } },
-      { bid: { $size: 0 } },
+    $and: [
+      { city: req.params.cityName },
+      { subCategoryName: req.params.subCategoryName },
+      {
+        $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
+      },
     ],
   })
     .select("-photo")
@@ -337,7 +343,7 @@ exports.bidding = (req, res) => {
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
       if (!result) return res.status(404).json("Not found");
-      
+
       const msg = "Bidding Done";
       return res.status(200).json(msg);
     }
