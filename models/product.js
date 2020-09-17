@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const statuses = Object.freeze({
-  0: 'Rejected',
-  1: 'Accepted',
-  2: 'Pending'
+  0: 'rejected',
+  1: 'accepted',
+  2: 'pending'
 })
 
 const productSchema = new mongoose.Schema(
@@ -61,6 +61,7 @@ const productSchema = new mongoose.Schema(
         userBidding: String,
         status: {
           type: String,
+          lowercase:true,
           enum: Object.values(statuses)
         }
       }
@@ -127,5 +128,16 @@ const productSchema = new mongoose.Schema(
 Object.assign(productSchema.statics, {
   statuses
 });
+
+productSchema.methods={
+  assureBid:function(userId){
+    if(this.userId==userId)
+    {
+      return true;
+    }
+    return false
+}
+}
+
 
 module.exports = mongoose.model("Product", productSchema);

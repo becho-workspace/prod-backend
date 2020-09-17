@@ -82,7 +82,7 @@ router.get("/product/getuserproducts/:userId",isSignedIn,isAuthenticated, getUse
 
 router.patch(
   "/product/changestatus/:productId/:biduserId",
-  isSignedIn,isAuthenticated,
+  isSignedIn,
   changependingstatus
 );
 

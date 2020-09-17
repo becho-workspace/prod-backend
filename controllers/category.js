@@ -18,7 +18,7 @@ exports.getSubCategoryById = (req,res,next,id)=>
 { 
   Category.findOne({"subCategory._id":id},{"subCategory.$.mcq":1,_id:0})
   .exec((err, subc) => 
-  { if (err) 
+  { if (err || !subc) 
     { return res.status(400).json(
       { 
         error: "SubCategory not found in DB"

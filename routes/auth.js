@@ -22,7 +22,7 @@ router.post(
     check("contact")
     .trim()
     .not().isEmpty()
-    .isNumeric("it should contains only numeric character")
+    .isNumeric().withMessage("it should contains only numeric character")
     .isLength({min:10 , max:10}),
     check("city")
     .trim()
