@@ -3,6 +3,7 @@ const formidable = require("formidable");
 const _ = require("lodash");
 const fs = require("fs");
 const User = require("../models/user");
+const {queryCheck}=require("../util/util")
 
 exports.getProductById = (req, res, next, id) => {
   Product.findById(id)
@@ -100,7 +101,7 @@ exports.createProduct = (req, res) => {
               error: "Server error",
             });
           }
-          // product.photo = undefined;
+          product.photo = undefined;
           res.json(product);
         });
       });
@@ -188,18 +189,50 @@ exports.updateProduct = (req, res) => {
   });
 };
 
+
+// Total product
+exports.countProducts = (req,res) => {
+  Product.countDocuments({ $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }]})
+    .then((data)=>{
+      res.json({count:data})
+    })
+    .catch(err=>res.status(501).json({err}))
+}
 //product listing
 
 exports.getAllProducts = (req, res) => {
-  let limit = req.query.limit ? parseInt(req.query.limit) : 8;
+
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let start=Number(req.query.start);
+  let end=Number(req.query.end);
+  let total=Number(req.query.total);
+  let limit=25;
+  let skip=0;
+  if(queryCheck(start,end,total))
+  {
+ if(start && !end)
+ {
+   limit=start;
+   skip=0;
+ }
+ else if(!start && end)
+ {
+   limit=0;
+   skip=total-end;
+ }
+ else if(start && end)
+ {
+   limit=end-start+1;
+   skip=start-1
+ }
+  }
 
   Product.find({
     $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
   })
-    .select("-photo")
     .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
+    .skip(skip)
     .limit(limit)
     .exec((err, products) => {
       if (err || products.length === 0) {
@@ -212,9 +245,33 @@ exports.getAllProducts = (req, res) => {
     });
 };
 
+
 exports.getAllProductsByCity = (req, res) => {
-  let limit = req.query.limit ? parseInt(req.query.limit) : 8;
+
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let start=Number(req.query.start);
+  let end=Number(req.query.end);
+  let total=Number(req.query.total);
+  let limit=20;
+  let skip=0;
+  if(queryCheck(start,end,total))
+  {
+ if(start && !end)
+ {
+   limit=start;
+   skip=0;
+ }
+ else if(!start && end)
+ {
+   limit=0;
+   skip=total-end;
+ }
+ else if(start && end)
+ {
+   limit=end-start+1;
+   skip=start-1
+ }
+  }
 
   // { "bid.status":{$ne:"Accepted"}
   Product.find({
@@ -225,9 +282,9 @@ exports.getAllProductsByCity = (req, res) => {
       },
     ],
   })
-    .select("-photo")
     .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
+    .skip(skip)
     .limit(limit)
     .exec((err, products) => {
       if (err || products.length === 0) {
@@ -240,8 +297,31 @@ exports.getAllProductsByCity = (req, res) => {
 };
 
 exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
-  let limit = req.query.limit ? parseInt(req.query.limit) : 8;
+
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let start=Number(req.query.start);
+  let end=Number(req.query.end);
+  let total=Number(req.query.total);
+  let limit=20;
+  let skip=0;
+  if(queryCheck(start,end,total))
+  {
+ if(start && !end)
+ {
+   limit=start;
+   skip=0;
+ }
+ else if(!start && end)
+ {
+   limit=0;
+   skip=total-end;
+ }
+ else if(start && end)
+ {
+   limit=end-start+1;
+   skip=start-1
+ }
+  }
 
   Product.find({
     city: req.params.cityName,
@@ -254,9 +334,9 @@ exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
       },
     ],
   })
-    .select("-photo")
     .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
+    .skip(skip)
     .limit(limit)
     .exec((err, products) => {
       if (err || products.length === 0) {
@@ -380,9 +460,7 @@ exports.changependingstatus = (req, res) => {
 
 //get all user's products
 exports.getUserProducts = (req, res) => {
-  req.profile.userProducts.forEach((product) => {
-    product.photo = undefined;
-  });
+
   res.json({
     products: req.profile.userProducts,
   });

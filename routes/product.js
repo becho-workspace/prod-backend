@@ -16,6 +16,7 @@ const {
   getbids,
   getUserProducts,
   changependingstatus,
+  countProducts
 } = require("../controllers/product");
 const {
   isSignedIn,
@@ -37,6 +38,10 @@ router.post(
   isAuthenticated,
   createProduct
 );
+
+// get total product number
+router.get("/products/count",countProducts);
+
 
 // read routes
 router.get("/product/:productId", isSignedIn, getProduct);
