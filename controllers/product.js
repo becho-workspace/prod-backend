@@ -100,7 +100,7 @@ exports.createProduct = (req, res) => {
               error: "Server error",
             });
           }
-          product.photo = undefined;
+          // product.photo = undefined;
           res.json(product);
         });
       });
