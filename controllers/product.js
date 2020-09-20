@@ -5,6 +5,8 @@ const fs = require("fs");
 const User = require("../models/user");
 const {queryCheck}=require("../util/util")
 
+
+
 exports.getProductById = (req, res, next, id) => {
   Product.findById(id)
     .populate("category", "name _id")
@@ -20,15 +22,7 @@ exports.getProductById = (req, res, next, id) => {
 };
 
 exports.createProduct = (req, res) => {
-  let form = new formidable.IncomingForm();
-  form.keepExtensions = true;
 
-  form.parse(req, (err, fields, file) => {
-    if (err) {
-      return res.status(400).json({
-        error: "problem with image",
-      });
-    }
     //destructure the fields
     const {
       name,
@@ -51,7 +45,7 @@ exports.createProduct = (req, res) => {
       ans9,
       ans10,
       ans11,
-    } = fields;
+    } = req.body;
 
     if (
       !name ||
@@ -66,29 +60,33 @@ exports.createProduct = (req, res) => {
       });
     }
 
-    let product = new Product(fields);
+    let product = new Product(req.body);
     product.userId = req.params.userId;
 
-    // handle file here
-    if (file.photo) {
-      if (file.photo.size > 3000000) {
-        return res.status(400).json({
-          error: "File size too big!",
-        });
-      }
-
-      product.photo.data = fs.readFileSync(file.photo.path);
-      product.photo.contentType = file.photo.type;
+    if(!req.file)
+    {
+      return res.status(400).json(
+        {
+          error:"Image is not uploaded, type of image is incorrect"
+        }
+      )
     }
 
+    if (req.file.size > 3000000) {
+      return res.status(400).json({
+        error: "File size too big!",
+      });
+    }
+    
+    product.photo.path = req.file.location;
     // save to the DB
     product.save((err, product) => {
       if (err) {
-        res.status(400).json({
+        return res.status(400).json({
           error: err,
         });
       }
-      User.findById(req.profile._id).exec((err, user) => {
+      User.findById(req.params.userId).exec((err, user) => {
         if (err) {
           return res.status(500).json({
             error: "Server error",
@@ -101,13 +99,12 @@ exports.createProduct = (req, res) => {
               error: "Server error",
             });
           }
-          product.photo = undefined;
           res.json(product);
         });
       });
     });
-  });
-};
+}
+
 
 exports.getProduct = (req, res) => {
   // req.product.photo = undefined;
