@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const upload=require("../util/upload_config");
 const {
   getProductById,
   createProduct,
@@ -16,7 +16,8 @@ const {
   getbids,
   getUserProducts,
   changependingstatus,
-  countProducts
+  countProducts,
+  
 } = require("../controllers/product");
 const {
   isSignedIn,
@@ -34,10 +35,12 @@ router.param("productId", getProductById);
 //create route
 router.post(
   "/product/create/:userId",
+  upload.single("photo"),
   isSignedIn,
   isAuthenticated,
   createProduct
 );
+
 
 // get total product number
 router.get("/products/count",countProducts);

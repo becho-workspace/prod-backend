@@ -6,6 +6,11 @@ const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const aws = require('aws-sdk');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+ 
+
 
 //My routes
 const authRoutes = require("./routes/auth");
@@ -13,6 +18,7 @@ const userRoutes = require("./routes/user");
 const categoryRoutes = require("./routes/category");
 const productRoutes = require("./routes/product");
 const orderRoutes = require("./routes/order");
+
 
 //DB Connection
 mongoose
@@ -28,10 +34,14 @@ mongoose
     console.log("error in connecting to DB");
   });
 
+ 
+
 //Middlewares
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors());
+
+
 
 //My Routes
 app.use("/api", authRoutes);
