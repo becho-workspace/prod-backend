@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const upload=require("../util/upload_config");
 const {
   getProductById,
   createProduct,
@@ -16,6 +16,8 @@ const {
   getbids,
   getUserProducts,
   changependingstatus,
+  countProducts,
+  
 } = require("../controllers/product");
 const {
   isSignedIn,
@@ -33,14 +35,20 @@ router.param("productId", getProductById);
 //create route
 router.post(
   "/product/create/:userId",
+  upload.single("photo"),
   isSignedIn,
   isAuthenticated,
   createProduct
 );
 
+
+// get total product number
+router.get("/products/count",countProducts);
+
+
 // read routes
-router.get("/product/:productId",isSignedIn, getProduct);
-router.get("/product/photo/:productId",isSignedIn,photo);
+router.get("/product", isSignedIn, getProduct);
+router.get("/product/photo/:productId", isSignedIn, photo);
 
 //delete route
 router.delete(
@@ -59,26 +67,36 @@ router.put(
 );
 
 //listing route
-router.get("/products",isSignedIn,getAllProducts);
-router.get("/products/:cityName",isSignedIn, getAllProductsByCity);
+router.get("/products", getAllProducts);
+router.get("/products/:cityName", getAllProductsByCity);
 router.get(
   "/products/:cityName/:subCategoryName",
   isSignedIn,
   getAllProductsByCityAndSubCategoryName
 );
 
-router.get("/products/categories",isSignedIn,getAllUniqueCategories);
+router.get("/products/categories", isSignedIn, getAllUniqueCategories);
 
 //bidding routes
 
 //bid a product
-router.patch("/product/bid/:productId/:userId",isSignedIn,isAuthenticated, bidding);
+router.patch(
+  "/product/bid/:productId/:userId",
+  isSignedIn,
+  isAuthenticated,
+  bidding
+);
 
 // get biddings done by user
-router.get("/product/getbids/:userId",isSignedIn,isAuthenticated, getbids);
+router.get("/product/getbids/:userId", isSignedIn, isAuthenticated, getbids);
 
 //get User's products
-router.get("/product/getuserproducts/:userId",isSignedIn,isAuthenticated, getUserProducts);
+router.get(
+  "/product/getuserproducts/:userId",
+  isSignedIn,
+  isAuthenticated,
+  getUserProducts
+);
 
 router.patch(
   "/product/changestatus/:productId/:biduserId",

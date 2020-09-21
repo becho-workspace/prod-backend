@@ -3,10 +3,10 @@ const formidable = require("formidable");
 const _ = require("lodash");
 const fs = require("fs");
 const User = require("../models/user");
+const { queryCheck } = require("../util/util");
 
 exports.getProductById = (req, res, next, id) => {
   Product.findById(id)
-    .populate("category", "name _id")
     .exec((err, product) => {
       if (err || !product) {
         return res.status(400).json({
@@ -19,98 +19,99 @@ exports.getProductById = (req, res, next, id) => {
 };
 
 exports.createProduct = (req, res) => {
-  let form = new formidable.IncomingForm();
-  form.keepExtensions = true;
+  //destructure the fields
+  const {
+    name,
+    description,
+    price,
+    category,
+    subCategoryName,
+    stock,
+    userId,
+    address,
+    city,
+    ans1,
+    ans2,
+    ans3,
+    ans4,
+    ans5,
+    ans6,
+    ans7,
+    ans8,
+    ans9,
+    ans10,
+    ans11,
+  } = req.body;
 
-  form.parse(req, (err, fields, file) => {
+  if (
+    !name ||
+    !description ||
+    !price ||
+    !address ||
+    !city ||
+    !subCategoryName
+  ) {
+    return res.status(400).json({
+      error: "Please include all fields",
+    });
+  }
+
+  let product = new Product(req.body);
+  product.userId = req.params.userId;
+
+  if (!req.file) {
+    return res.status(400).json({
+      error: "Image is not uploaded, type of image is incorrect",
+    });
+  }
+
+  if (req.file.size > 3000000) {
+    return res.status(400).json({
+      error: "File size too big!",
+    });
+  }
+
+  product.photo.path = req.file.location;
+  // save to the DB
+  product.save((err, product) => {
     if (err) {
       return res.status(400).json({
-        error: "problem with image",
+        error: err,
       });
     }
-    //destructure the fields
-    const {
-      name,
-      description,
-      price,
-      category,
-      subCategoryName,
-      stock,
-      userId,
-      address,
-      city,
-      ans1,
-      ans2,
-      ans3,
-      ans4,
-      ans5,
-      ans6,
-      ans7,
-      ans8,
-      ans9,
-      ans10,
-      ans11,
-    } = fields;
-
-    if (
-      !name ||
-      !description ||
-      !price ||
-      !address ||
-      !city ||
-      !subCategoryName
-    ) {
-      return res.status(400).json({
-        error: "Please include all fields",
-      });
-    }
-
-    let product = new Product(fields);
-    product.userId = req.params.userId;
-
-    // handle file here
-    if (file.photo) {
-      if (file.photo.size > 3000000) {
-        return res.status(400).json({
-          error: "File size too big!",
-        });
-      }
-
-      product.photo.data = fs.readFileSync(file.photo.path);
-      product.photo.contentType = file.photo.type;
-    }
-
-    // save to the DB
-    product.save((err, product) => {
+    User.findById(req.params.userId).exec((err, user) => {
       if (err) {
-        res.status(400).json({
-          error: err,
+        return res.status(500).json({
+          error: "Server error ",
         });
       }
-      User.findById(req.profile._id).exec((err, user) => {
+      user.userProducts.push(product);
+      user.save((err, user) => {
         if (err) {
           return res.status(500).json({
-            error: "Server error",
+            error: "Server error 1",
           });
         }
-        user.userProducts.push(product);
-        user.save((err, user) => {
-          if (err) {
-            return res.status(500).json({
-              error: "Server error",
-            });
-          }
-          product.photo = undefined;
-          res.json(product);
-        });
+        res.json(product);
       });
     });
   });
 };
 
 exports.getProduct = (req, res) => {
-  req.product.photo = undefined;
-  return res.json(req.product);
+  Product.findOne({_id:req.query.id})
+  .exec((err,product)=>
+  {
+    if(!product || err)
+    {
+     return  res.status(400).json(
+        {
+          error:"Product was not found in DB"
+        }
+      )
+    }
+     res.json(product);
+  })
 };
 
 //middleware
@@ -188,18 +189,48 @@ exports.updateProduct = (req, res) => {
   });
 };
 
+// Total product
+exports.countProducts = (req, res) => {
+  Product.countDocuments({
+    $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
+  })
+    .then((data) => {
+      if(data==0)
+      {
+        return res.json({msg:"NO products in DB"})
+      }
+      return res.json({ count: data });
+    })
+    .catch((err) => res.status(501).json({ err }));
+};
 //product listing
 
 exports.getAllProducts = (req, res) => {
-  let limit = req.query.limit ? parseInt(req.query.limit) : 8;
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let start = Number(req.query.start);
+  let end = Number(req.query.end);
+  let total = Number(req.query.total);
+  let limit = 25;
+  let skip = 0;
+  if (queryCheck(start, end, total)) {
+    if (start && !end) {
+      limit = start;
+      skip = 0;
+    } else if (!start && end) {
+      limit = 0;
+      skip = total - end;
+    } else if (start && end) {
+      limit = end - start + 1;
+      skip = start - 1;
+    }
+  }
 
   Product.find({
     $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
   })
-    .select("-photo")
-    .populate("category", "name _id")
+    // .populate("name _id")
     .sort([[sortBy, "asc"]])
+    .skip(skip)
     .limit(limit)
     .exec((err, products) => {
       if (err || products.length === 0) {
@@ -213,8 +244,24 @@ exports.getAllProducts = (req, res) => {
 };
 
 exports.getAllProductsByCity = (req, res) => {
-  let limit = req.query.limit ? parseInt(req.query.limit) : 8;
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let start = Number(req.query.start);
+  let end = Number(req.query.end);
+  let total = Number(req.query.total);
+  let limit = 20;
+  let skip = 0;
+  if (queryCheck(start, end, total)) {
+    if (start && !end) {
+      limit = start;
+      skip = 0;
+    } else if (!start && end) {
+      limit = 0;
+      skip = total - end;
+    } else if (start && end) {
+      limit = end - start + 1;
+      skip = start - 1;
+    }
+  }
 
   // { "bid.status":{$ne:"Accepted"}
   Product.find({
@@ -225,9 +272,8 @@ exports.getAllProductsByCity = (req, res) => {
       },
     ],
   })
-    .select("-photo")
-    .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
+    .skip(skip)
     .limit(limit)
     .exec((err, products) => {
       if (err || products.length === 0) {
@@ -240,8 +286,24 @@ exports.getAllProductsByCity = (req, res) => {
 };
 
 exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
-  let limit = req.query.limit ? parseInt(req.query.limit) : 8;
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let start = Number(req.query.start);
+  let end = Number(req.query.end);
+  let total = Number(req.query.total);
+  let limit = 20;
+  let skip = 0;
+  if (queryCheck(start, end, total)) {
+    if (start && !end) {
+      limit = start;
+      skip = 0;
+    } else if (!start && end) {
+      limit = 0;
+      skip = total - end;
+    } else if (start && end) {
+      limit = end - start + 1;
+      skip = start - 1;
+    }
+  }
 
   Product.find({
     city: req.params.cityName,
@@ -254,9 +316,8 @@ exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
       },
     ],
   })
-    .select("-photo")
-    .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
+    .skip(skip)
     .limit(limit)
     .exec((err, products) => {
       if (err || products.length === 0) {
@@ -307,7 +368,8 @@ exports.getbids = (req, res) => {
   if (!cc) {
     return res.json("Product not found");
   }
-    return res.json(req.profile.mybids)
+  return res.json(req.profile.mybids)
+
 };
 
 //bid a product
@@ -341,7 +403,6 @@ exports.bidding = (req, res) => {
         return res.status(500).json({ msg:"error in saving bid"})
       if (!result) return res.status(404).json("Not found");
       req.profile.addBid(req.params.productId,req.body.price,res)
-      
     }
   );
 };
@@ -375,9 +436,6 @@ exports.changependingstatus = (req, res) => {
 
 //get all user's products
 exports.getUserProducts = (req, res) => {
-  req.profile.userProducts.forEach((product) => {
-    product.photo = undefined;
-  });
   res.json({
     products: req.profile.userProducts,
   });

@@ -91,7 +91,7 @@ module.exports.getOTP=(req,res)=>
   {
     if (err || !user) {
       return res.status(400).json({
-        error: "No such user existes "
+        error: "No such user was existes "
       });
     }
     const OTP=Math.floor((Math.random()*100000)+100000);
