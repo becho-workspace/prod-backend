@@ -128,4 +128,13 @@ Object.assign(productSchema.statics, {
   statuses,
 });
 
+productSchema.methods = {
+  assureBid: function (userId) {
+    if (this.userId == userId) {
+      return true;
+    }
+    return false;
+  },
+};
+
 module.exports = mongoose.model("Product", productSchema);
