@@ -447,7 +447,7 @@ exports.checkStatus = (req, res) => {
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
       if (!result) return res.status(404).json("No product found");
-      return res.status(200).json({ data: bid.status });
+      return res.status(200);
     }
   );
 };
