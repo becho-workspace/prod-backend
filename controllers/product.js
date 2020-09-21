@@ -82,7 +82,8 @@ exports.createProduct = (req, res) => {
     User.findById(req.params.userId).exec((err, user) => {
       if (err) {
         return res.status(500).json({
-          error: "Server error ",
+
+          error: "Server error",
         });
       }
       user.userProducts.push(product);
@@ -195,11 +196,13 @@ exports.countProducts = (req, res) => {
     $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
   })
     .then((data) => {
+
       if(data==0)
       {
         return res.json({msg:"NO products in DB"})
       }
       return res.json({ count: data });
+
     })
     .catch((err) => res.status(501).json({ err }));
 };

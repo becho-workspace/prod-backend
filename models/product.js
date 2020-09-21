@@ -31,8 +31,6 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      lowercase: true,
-      trim: true,
     },
     subCategoryName: {
       type: String,
@@ -129,15 +127,5 @@ const productSchema = new mongoose.Schema(
 Object.assign(productSchema.statics, {
   statuses,
 });
-
-productSchema.methods={
-  assureBid:function(userId){
-    if(this.userId==userId)
-    {
-      return true;
-    }
-    return false
-}
-}
 
 module.exports = mongoose.model("Product", productSchema);
