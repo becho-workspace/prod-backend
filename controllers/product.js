@@ -3,13 +3,10 @@ const formidable = require("formidable");
 const _ = require("lodash");
 const fs = require("fs");
 const User = require("../models/user");
-const {queryCheck}=require("../util/util")
-
-
+const { queryCheck } = require("../util/util");
 
 exports.getProductById = (req, res, next, id) => {
   Product.findById(id)
-    .populate("category", "name _id")
     .exec((err, product) => {
       if (err || !product) {
         return res.status(400).json({
@@ -22,93 +19,99 @@ exports.getProductById = (req, res, next, id) => {
 };
 
 exports.createProduct = (req, res) => {
+  //destructure the fields
+  const {
+    name,
+    description,
+    price,
+    category,
+    subCategoryName,
+    stock,
+    userId,
+    address,
+    city,
+    ans1,
+    ans2,
+    ans3,
+    ans4,
+    ans5,
+    ans6,
+    ans7,
+    ans8,
+    ans9,
+    ans10,
+    ans11,
+  } = req.body;
 
-    //destructure the fields
-    const {
-      name,
-      description,
-      price,
-      category,
-      subCategoryName,
-      stock,
-      userId,
-      address,
-      city,
-      ans1,
-      ans2,
-      ans3,
-      ans4,
-      ans5,
-      ans6,
-      ans7,
-      ans8,
-      ans9,
-      ans10,
-      ans11,
-    } = req.body;
+  if (
+    !name ||
+    !description ||
+    !price ||
+    !address ||
+    !city ||
+    !subCategoryName
+  ) {
+    return res.status(400).json({
+      error: "Please include all fields",
+    });
+  }
 
-    if (
-      !name ||
-      !description ||
-      !price ||
-      !address ||
-      !city ||
-      !subCategoryName
-    ) {
+  let product = new Product(req.body);
+  product.userId = req.params.userId;
+
+  if (!req.file) {
+    return res.status(400).json({
+      error: "Image is not uploaded, type of image is incorrect",
+    });
+  }
+
+  if (req.file.size > 3000000) {
+    return res.status(400).json({
+      error: "File size too big!",
+    });
+  }
+
+  product.photo.path = req.file.location;
+  // save to the DB
+  product.save((err, product) => {
+    if (err) {
       return res.status(400).json({
-        error: "Please include all fields",
+        error: err,
       });
     }
-
-    let product = new Product(req.body);
-    product.userId = req.params.userId;
-
-    if(!req.file)
-    {
-      return res.status(400).json(
-        {
-          error:"Image is not uploaded, type of image is incorrect"
-        }
-      )
-    }
-
-    if (req.file.size > 3000000) {
-      return res.status(400).json({
-        error: "File size too big!",
-      });
-    }
-    
-    product.photo.path = req.file.location;
-    // save to the DB
-    product.save((err, product) => {
+    User.findById(req.params.userId).exec((err, user) => {
       if (err) {
-        return res.status(400).json({
-          error: err,
+        return res.status(500).json({
+          error: "Server error",
         });
       }
-      User.findById(req.params.userId).exec((err, user) => {
+      user.userProducts.push(product);
+      user.save((err, user) => {
         if (err) {
           return res.status(500).json({
             error: "Server error",
           });
         }
-        user.userProducts.push(product);
-        user.save((err, user) => {
-          if (err) {
-            return res.status(500).json({
-              error: "Server error",
-            });
-          }
-          res.json(product);
-        });
+        res.json(product);
       });
     });
-}
-
+  });
+};
 
 exports.getProduct = (req, res) => {
-  // req.product.photo = undefined;
-  return res.json(req.product);
+  Product.findOne({_id:req.query.id})
+  .exec((err,product)=>
+  {
+    if(!product || err)
+    {
+     return  res.status(400).json(
+        {
+          error:"Product was not found in DB"
+        }
+      )
+    }
+     res.json(product);
+  })
 };
 
 //middleware
@@ -186,48 +189,42 @@ exports.updateProduct = (req, res) => {
   });
 };
 
-
 // Total product
-exports.countProducts = (req,res) => {
-  Product.countDocuments({ $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }]})
-    .then((data)=>{
-      res.json({count:data})
+exports.countProducts = (req, res) => {
+  Product.countDocuments({
+    $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
+  })
+    .then((data) => {
+      res.json({ count: data });
     })
-    .catch(err=>res.status(501).json({err}))
-}
+    .catch((err) => res.status(501).json({ err }));
+};
 //product listing
 
 exports.getAllProducts = (req, res) => {
-
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
-  let start=Number(req.query.start);
-  let end=Number(req.query.end);
-  let total=Number(req.query.total);
-  let limit=25;
-  let skip=0;
-  if(queryCheck(start,end,total))
-  {
- if(start && !end)
- {
-   limit=start;
-   skip=0;
- }
- else if(!start && end)
- {
-   limit=0;
-   skip=total-end;
- }
- else if(start && end)
- {
-   limit=end-start+1;
-   skip=start-1
- }
+  let start = Number(req.query.start);
+  let end = Number(req.query.end);
+  let total = Number(req.query.total);
+  let limit = 25;
+  let skip = 0;
+  if (queryCheck(start, end, total)) {
+    if (start && !end) {
+      limit = start;
+      skip = 0;
+    } else if (!start && end) {
+      limit = 0;
+      skip = total - end;
+    } else if (start && end) {
+      limit = end - start + 1;
+      skip = start - 1;
+    }
   }
 
   Product.find({
     $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
   })
-    .populate("category", "name _id")
+    // .populate("name _id")
     .sort([[sortBy, "asc"]])
     .skip(skip)
     .limit(limit)
@@ -242,32 +239,24 @@ exports.getAllProducts = (req, res) => {
     });
 };
 
-
 exports.getAllProductsByCity = (req, res) => {
-
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
-  let start=Number(req.query.start);
-  let end=Number(req.query.end);
-  let total=Number(req.query.total);
-  let limit=20;
-  let skip=0;
-  if(queryCheck(start,end,total))
-  {
- if(start && !end)
- {
-   limit=start;
-   skip=0;
- }
- else if(!start && end)
- {
-   limit=0;
-   skip=total-end;
- }
- else if(start && end)
- {
-   limit=end-start+1;
-   skip=start-1
- }
+  let start = Number(req.query.start);
+  let end = Number(req.query.end);
+  let total = Number(req.query.total);
+  let limit = 20;
+  let skip = 0;
+  if (queryCheck(start, end, total)) {
+    if (start && !end) {
+      limit = start;
+      skip = 0;
+    } else if (!start && end) {
+      limit = 0;
+      skip = total - end;
+    } else if (start && end) {
+      limit = end - start + 1;
+      skip = start - 1;
+    }
   }
 
   // { "bid.status":{$ne:"Accepted"}
@@ -279,7 +268,6 @@ exports.getAllProductsByCity = (req, res) => {
       },
     ],
   })
-    .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
     .skip(skip)
     .limit(limit)
@@ -294,30 +282,23 @@ exports.getAllProductsByCity = (req, res) => {
 };
 
 exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
-
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
-  let start=Number(req.query.start);
-  let end=Number(req.query.end);
-  let total=Number(req.query.total);
-  let limit=20;
-  let skip=0;
-  if(queryCheck(start,end,total))
-  {
- if(start && !end)
- {
-   limit=start;
-   skip=0;
- }
- else if(!start && end)
- {
-   limit=0;
-   skip=total-end;
- }
- else if(start && end)
- {
-   limit=end-start+1;
-   skip=start-1
- }
+  let start = Number(req.query.start);
+  let end = Number(req.query.end);
+  let total = Number(req.query.total);
+  let limit = 20;
+  let skip = 0;
+  if (queryCheck(start, end, total)) {
+    if (start && !end) {
+      limit = start;
+      skip = 0;
+    } else if (!start && end) {
+      limit = 0;
+      skip = total - end;
+    } else if (start && end) {
+      limit = end - start + 1;
+      skip = start - 1;
+    }
   }
 
   Product.find({
@@ -331,7 +312,6 @@ exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
       },
     ],
   })
-    .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
     .skip(skip)
     .limit(limit)
@@ -457,7 +437,6 @@ exports.changependingstatus = (req, res) => {
 
 //get all user's products
 exports.getUserProducts = (req, res) => {
-
   res.json({
     products: req.profile.userProducts,
   });

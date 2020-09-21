@@ -7,29 +7,28 @@ const categorySchema = new mongoose.Schema(
       required: true,
       maxlength: 32,
       unique: true,
-      lowercase:true
+      lowercase: true,
     },
-    subCategory:[{
-      name:
+    subCategory: [
       {
-          type:String,
-          trim:true,
-          unique:true,
-          lowercase:true
-      },
-      mcq:[
+        name: {
+          type: String,
+          trim: true,
+          unique: true,
+          lowercase: true,
+        },
+        mcq: [
           {
-            question:
-            {
-                type:String,
+            question: {
+              type: String,
             },
-            options:[String]
-  }
-]
-  }]
+            options: [String],
+          },
+        ],
+      },
+    ],
   },
   { timestamps: true }
 );
 
-module.exports= mongoose.model("Category", categorySchema);
-
+module.exports = mongoose.model("Category", categorySchema);

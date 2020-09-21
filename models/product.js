@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Schema;
 
 const statuses = Object.freeze({
-  0: 'Rejected',
-  1: 'Accepted',
-  2: 'Pending'
-})
+  0: "Rejected",
+  1: "Accepted",
+  2: "Pending",
+});
 
 const productSchema = new mongoose.Schema(
   {
@@ -14,48 +14,46 @@ const productSchema = new mongoose.Schema(
       trim: true,
       required: true,
       maxlength: 32,
-      lowercase:true
+      lowercase: true,
     },
     description: {
       type: String,
       trim: true,
       required: true,
-      maxlength: 2000
+      maxlength: 2000,
     },
     price: {
       type: Number,
       required: true,
       maxlength: 32,
-      trim: true
+      trim: true,
     },
     category: {
-      type: ObjectId,
-      ref:"Category",
-      required:true
+      type: String,
+      required: true,
     },
     subCategoryName: {
       type: String,
       required: true,
-      lowercase:true,
-      trim:true
+      lowercase: true,
+      trim: true,
     },
     stock: {
-      type: Number
+      type: Number,
     },
     sold: {
       type: Number,
-      default: 0
+      default: 0,
     },
     photo: {
-     path:
-     {
-       type:String
-     }
+      path: {
+        type: String,
+      },
     },
     userId: {
       type: String,
       required: true,
-      default: "Not assigned yet"
+      default: "Not assigned yet",
     },
     bid: [
       {
@@ -63,9 +61,9 @@ const productSchema = new mongoose.Schema(
         userBidding: String,
         status: {
           type: String,
-          enum: Object.values(statuses)
-        }
-      }
+          enum: Object.values(statuses),
+        },
+      },
     ],
     address: {
       type: String,
@@ -75,59 +73,59 @@ const productSchema = new mongoose.Schema(
     city: {
       type: String,
       required: true,
-      lowercase:true,
-      trim:true
+      lowercase: true,
+      trim: true,
     },
     ans1: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans2: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans3: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans4: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans5: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans6: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans7: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans8: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans9: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans10: {
       type: String,
-      default: "Null"
+      default: "Null",
     },
     ans11: {
       type: String,
-      default: "Null"
-    }
+      default: "Null",
+    },
   },
   { timestamps: true }
 );
 
 Object.assign(productSchema.statics, {
-  statuses
+  statuses,
 });
 
 module.exports = mongoose.model("Product", productSchema);
