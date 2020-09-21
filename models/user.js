@@ -121,7 +121,44 @@ userSchema.methods = {
     } catch (err) {
       return "";
     }
-  }
+  },
+  addBid: function (productId, price, res) {
+    this.mybids.push({
+      bidOffer: price,
+      productId,
+    });
+    this.save()
+      .then((data) => {
+        if (!!data) {
+          const msg = "Bidding Done";
+          return res.status(200).json(msg);
+        }
+      })
+      .catch((err) => res.status(500).json({ msg: "error in saving bid" }));
+  },
+};
+userSchema.statics.updateStatus = function (biderId, productId, status, res) {
+
+  this.findOneAndUpdate(
+   {_id: biderId, "mybids.productId": productId },
+   {
+     $set: {
+       "mybids.$.status": status,
+     },
+   },
+   { new: true, useFindAndModify: false }
+ )
+ .exec()
+ .then((data) => {
+     if (!!data) {
+       return res.json({ msg: "Status changed" });
+     }
+     return res.json({ msg: "Failed to changed status" })
+   })
+   .catch((err) => {
+     console.log(err)
+     return res.status(500).json({ msg: "Failed to changed status" });
+   });
 };
 
 module.exports = mongoose.model("User", userSchema);

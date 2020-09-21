@@ -82,6 +82,7 @@ exports.createProduct = (req, res) => {
     User.findById(req.params.userId).exec((err, user) => {
       if (err) {
         return res.status(500).json({
+
           error: "Server error",
         });
       }
@@ -89,7 +90,7 @@ exports.createProduct = (req, res) => {
       user.save((err, user) => {
         if (err) {
           return res.status(500).json({
-            error: "Server error",
+            error: "Server error 1",
           });
         }
         res.json(product);
@@ -195,7 +196,13 @@ exports.countProducts = (req, res) => {
     $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
   })
     .then((data) => {
-      res.json({ count: data });
+
+      if(data==0)
+      {
+        return res.json({msg:"NO products in DB"})
+      }
+      return res.json({ count: data });
+
     })
     .catch((err) => res.status(501).json({ err }));
 };
@@ -364,27 +371,24 @@ exports.getbids = (req, res) => {
   if (!cc) {
     return res.json("Product not found");
   }
+  return res.json(req.profile.mybids)
 
-  Product.find(
-    { bid: { $elemMatch: { userBidding: req.params.userId } } },
-    { bid: 1 },
-    (err, result) => {
-      if (err) return res.status(500).json({ msg: err });
-      if (result.length == 0) return res.status(404).json("Not found");
-      result.photo = undefined;
-      return res.status(200).json({ data: result });
-    }
-  );
 };
 
 //bid a product
 
 exports.bidding = (req, res) => {
   var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
-  var cc = checkForHexRegExp.test(req.params.productId);
+  var cc = checkForHexRegExp.test(req.params.productId); 
   if (!cc) {
-    return res.json("Product not found");
+    return res.json("Product not Found");
   }
+   // user itself can't bid on its on product
+   const a=req.product.assureBid(req.params.userId);
+   if(a)
+   {
+      return res.json({msg:"You cant bid your own product"})
+   }
   Product.findOneAndUpdate(
     { _id: req.params.productId },
     {
@@ -392,17 +396,16 @@ exports.bidding = (req, res) => {
         bid: {
           price: req.body.price,
           userBidding: req.params.userId,
-          status: req.body.status,
+          status: req.body.status
         },
       },
     },
     { new: true, useFindAndModify: false },
     (err, result) => {
-      if (err) return res.status(500).json({ msg: err });
+      if (err) 
+        return res.status(500).json({ msg:"error in saving bid"})
       if (!result) return res.status(404).json("Not found");
-
-      const msg = "Bidding Done";
-      return res.status(200).json(msg);
+      req.profile.addBid(req.params.productId,req.body.price,res)
     }
   );
 };
@@ -429,8 +432,7 @@ exports.changependingstatus = (req, res) => {
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
       if (!result) return res.status(404).json("Not found");
-      const msg = "Status changed";
-      return res.status(200).json(msg);
+      User.updateStatus(req.params.biduserId,req.params.productId,req.body.status,res)
     }
   );
 };
