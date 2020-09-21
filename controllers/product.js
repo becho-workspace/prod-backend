@@ -432,6 +432,27 @@ exports.changependingstatus = (req, res) => {
   );
 };
 
+
+exports.checkStatus = (req, res) => {
+  Product.find(
+    {
+      $and: [
+        { "bid.userBidding": req.params.userId },
+        { "bid.productId": req.params.productId },
+      ],
+    },
+    {
+      "bid.status": 1,
+    },
+    { new: true, useFindAndModify: false },
+    (err, result) => {
+      if (err) return res.status(500).json({ msg: err });
+      if (!result) return res.status(404).json("No product found");
+      return res.status(200).json({ data: result });
+    }
+  );
+};
+
 //get all user's products
 exports.getUserProducts = (req, res) => {
   res.json({

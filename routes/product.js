@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const upload=require("../util/upload_config");
+const upload = require("../util/upload_config");
 const {
   getProductById,
   createProduct,
@@ -17,7 +17,7 @@ const {
   getUserProducts,
   changependingstatus,
   countProducts,
-  
+  checkStatus,
 } = require("../controllers/product");
 const {
   isSignedIn,
@@ -41,10 +41,8 @@ router.post(
   createProduct
 );
 
-
 // get total product number
-router.get("/products/count",countProducts);
-
+router.get("/products/count", countProducts);
 
 // read routes
 router.get("/product", isSignedIn, getProduct);
@@ -103,5 +101,7 @@ router.patch(
   isSignedIn,
   changependingstatus
 );
+
+router.get("/product/checkstatus/:userId/:productId", checkStatus);
 
 module.exports = router;
