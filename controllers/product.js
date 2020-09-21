@@ -227,7 +227,6 @@ exports.getAllProducts = (req, res) => {
   Product.find({
     $or: [{ "bid.status": { $ne: "Accepted" } }, { bid: { $size: 0 } }],
   })
-    .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
     .skip(skip)
     .limit(limit)
