@@ -7,7 +7,6 @@ const { queryCheck } = require("../util/util");
 
 exports.getProductById = (req, res, next, id) => {
   Product.findById(id)
-    .populate("category", "name _id")
     .exec((err, product) => {
       if (err || !product) {
         return res.status(400).json({
@@ -100,8 +99,19 @@ exports.createProduct = (req, res) => {
 };
 
 exports.getProduct = (req, res) => {
-  // req.product.photo = undefined;
-  return res.json(req.product);
+  Product.findOne({_id:req.query.id})
+  .exec((err,product)=>
+  {
+    if(!product || err)
+    {
+     return  res.status(400).json(
+        {
+          error:"Product was not found in DB"
+        }
+      )
+    }
+     res.json(product);
+  })
 };
 
 //middleware
@@ -258,7 +268,6 @@ exports.getAllProductsByCity = (req, res) => {
       },
     ],
   })
-    .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
     .skip(skip)
     .limit(limit)
@@ -303,7 +312,6 @@ exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
       },
     ],
   })
-    .populate("category", "name _id")
     .sort([[sortBy, "asc"]])
     .skip(skip)
     .limit(limit)

@@ -47,7 +47,7 @@ router.get("/products/count",countProducts);
 
 
 // read routes
-router.get("/product/:productId", isSignedIn, getProduct);
+router.get("/product", isSignedIn, getProduct);
 router.get("/product/photo/:productId", isSignedIn, photo);
 
 //delete route
