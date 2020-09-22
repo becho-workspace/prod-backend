@@ -368,7 +368,9 @@ exports.getbids = (req, res) => {
   if (!cc) {
     return res.json("Product not found");
   }
-  return res.json(req.profile.mybids)
+  return res.json({
+    bid:req.profile.mybids,
+  })
 
 };
 
@@ -393,7 +395,8 @@ exports.bidding = (req, res) => {
         bid: {
           price: req.body.price,
           userBidding: req.params.userId,
-          status: req.body.status
+          status: req.body.status,
+          name:req.profile.name
         },
       },
     },
