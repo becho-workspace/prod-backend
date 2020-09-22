@@ -102,6 +102,6 @@ router.patch(
   changependingstatus
 );
 
-router.get("/product/checkstatus/:userId/:productId", checkStatus);
+router.get("/product/checkstatus/:biduserId/:productId", checkStatus);
 
 module.exports = router;

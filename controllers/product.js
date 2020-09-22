@@ -436,20 +436,18 @@ exports.changependingstatus = (req, res) => {
 exports.checkStatus = (req, res) => {
   Product.find(
     {
-      $and: [
-        { "bid.userBidding": req.params.userId },
-        { "bid.productId": req.params.productId },
-      ],
+      _id: req.params.productId,
+      "bid.userBidding": req.params.biduserId,
     },
     {
-      "bid.status": 1,
+      "bid.$.status": 1,
     },
     { new: true, useFindAndModify: false },
     (err, result) => {
       if (err) return res.status(500).json({ msg: err });
       if (!result) return res.status(404).json("No product found");
-      return res.status(200);
-      console.log(bid.status);
+      return res.status(200).json(result);
+      // console.log(bid.status);
     }
   );
 };
