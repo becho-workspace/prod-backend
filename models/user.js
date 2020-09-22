@@ -125,6 +125,8 @@ userSchema.methods = {
     });
     this.save()
       .then((data) => {
+
+        
         if (!!data) {
           const msg = "Bidding Done";
           return res.status(200).json(msg);
