@@ -386,7 +386,7 @@ exports.bidding = (req, res) => {
       $push: {
         bid: {
           askedprice: req.body.askedprice,
-          offeredprice: req.body.price,
+          offeredprice: req.body.offeredprice,
           userBidding: req.params.userId,
           status: req.body.status,
           name: req.profile.name,
