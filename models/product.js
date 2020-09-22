@@ -57,7 +57,8 @@ const productSchema = new mongoose.Schema(
     },
     bid: [
       {
-        price: Number,
+        askedprice: Number,
+        offeredprice: Number,
         userBidding: String,
         name: String,
         status: {

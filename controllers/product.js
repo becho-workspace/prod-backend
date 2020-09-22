@@ -385,7 +385,8 @@ exports.bidding = (req, res) => {
     {
       $push: {
         bid: {
-          price: req.body.price,
+          askedprice: req.body.askedprice,
+          offeredprice: req.body.price,
           userBidding: req.params.userId,
           status: req.body.status,
           name: req.profile.name,
@@ -396,7 +397,12 @@ exports.bidding = (req, res) => {
     (err, result) => {
       if (err) return res.status(500).json({ msg: "error in saving bid" });
       if (!result) return res.status(404).json("Not found");
-      req.profile.addBid(req.params.productId, req.body.price, res);
+      req.profile.addBid(
+        req.params.productId,
+        req.body.offeredprice,
+        req.body.askedprice,
+        res
+      );
     }
   );
 };

@@ -115,10 +115,11 @@ userSchema.methods = {
       return "";
     }
   },
-  addBid: function (productId, price, res) {
+  addBid: function (productId, offeredprice, askedprice, res) {
     this.mybids.push({
-      bidOffer: price,
+      bidOffer: offeredprice,
       productId,
+      askedprice: askedprice,
     });
     this.save()
       .then((data) => {
