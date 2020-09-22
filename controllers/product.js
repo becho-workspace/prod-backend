@@ -460,15 +460,16 @@ exports.checkStatus = (req, res) => {
 
 //get all user's products
 exports.getUserProducts = (req, res) => {
-  req.profile.userProducts.forEach((data)=>{
-      data.bid.forEach(bid=>{
-        if(bid.status=="Accepted" || bid.status=="Rejected")
-      {
-          data.bid.pull(bid)
-      }
-      })
-  })
+  var userBid=[];
+ req.profile.userProducts.forEach((product)=>
+ {
+   userBid= product.bid.filter((bid)=>
+    {
+      return bid.status=="Pending"
+   })
+   product.bid=userBid;
+ })
   res.json({
     products: req.profile.userProducts,
   })
-};
+}
