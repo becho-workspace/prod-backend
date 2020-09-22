@@ -55,6 +55,8 @@ var userSchema = new mongoose.Schema(
     },
     mybids: [
       {
+        
+        askedprice:Number,
         productId: String,
         bidOffer: Number,
         status: {
