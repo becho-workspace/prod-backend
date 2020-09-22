@@ -203,7 +203,7 @@ exports.getAllProducts = (req, res) => {
   let start = Number(req.query.start);
   let end = Number(req.query.end);
   let total = Number(req.query.total);
-  let limit = 25;
+  let limit = 0;
   let skip = 0;
   if (queryCheck(start, end, total)) {
     if (start && !end) {
@@ -241,7 +241,7 @@ exports.getAllProductsByCity = (req, res) => {
   let start = Number(req.query.start);
   let end = Number(req.query.end);
   let total = Number(req.query.total);
-  let limit = 20;
+  let limit = 0;
   let skip = 0;
   if (queryCheck(start, end, total)) {
     if (start && !end) {
@@ -283,7 +283,7 @@ exports.getAllProductsByCityAndSubCategoryName = (req, res) => {
   let start = Number(req.query.start);
   let end = Number(req.query.end);
   let total = Number(req.query.total);
-  let limit = 20;
+  let limit = 0;
   let skip = 0;
   if (queryCheck(start, end, total)) {
     if (start && !end) {
@@ -460,7 +460,15 @@ exports.checkStatus = (req, res) => {
 
 //get all user's products
 exports.getUserProducts = (req, res) => {
+  req.profile.userProducts.forEach((data)=>{
+      data.bid.forEach(bid=>{
+        if(bid.status=="Accepted" || bid.status=="Rejected")
+      {
+          data.bid.pull(bid)
+      }
+      })
+  })
   res.json({
     products: req.profile.userProducts,
-  });
+  })
 };
