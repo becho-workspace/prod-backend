@@ -388,6 +388,7 @@ exports.bidding = (req, res) => {
           price: req.body.price,
           userBidding: req.params.userId,
           status: req.body.status,
+          name: req.profile.name,
         },
       },
     },
@@ -448,6 +449,7 @@ exports.checkStatus = (req, res) => {
       if (err) return res.status(500).json({ msg: err });
       if (!result) return res.status(404).json("No product found");
       return res.status(200);
+      console.log(bid.status);
     }
   );
 };

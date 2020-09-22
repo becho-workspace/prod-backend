@@ -59,6 +59,7 @@ const productSchema = new mongoose.Schema(
       {
         price: Number,
         userBidding: String,
+        name: String,
         status: {
           type: String,
           enum: Object.values(statuses),
