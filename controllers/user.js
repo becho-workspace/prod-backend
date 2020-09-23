@@ -13,6 +13,17 @@ exports.getUserById = (req, res, next, id) => {
     next();
   });
 };
+exports.getBidderUserById = (req, res, next, id) => {
+  User.findById(id).populate("userProducts").exec((err, user) => {
+    if (err || !user) {
+      return res.status(400).json({
+        error: "No such user exists "
+      });
+    }
+    req.bidprofile = user;
+    next();
+  });
+};
 
 exports.getUser = (req, res) => {
   req.profile.salt = undefined;
