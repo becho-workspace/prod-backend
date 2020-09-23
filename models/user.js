@@ -26,6 +26,11 @@ var userSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
+    address: {
+      type: String,
+      required: true,
+      lowercase: true,
+    },
     contact: {
       type: String,
       required: true,
