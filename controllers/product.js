@@ -78,21 +78,15 @@ exports.createProduct = (req, res) => {
         error: err,
       });
     }
-    User.findById(req.params.userId).exec((err, user) => {
+    req.profile.userProducts.push(product);
+    req.profile.save((err, user) => {
       if (err) {
+        console.log(err)
         return res.status(500).json({
-          error: "Server error",
+          error: "Server error 1",
         });
       }
-      user.userProducts.push(product);
-      user.save((err, user) => {
-        if (err) {
-          return res.status(500).json({
-            error: "Server error 1",
-          });
-        }
-        res.json(product);
-      });
+      res.json(product);
     });
   });
 };
@@ -378,8 +372,10 @@ exports.bidding = (req, res) => {
   // user itself can't bid on its on product
   const a = req.product.assureBid(req.params.userId);
   if (a) {
-    return res.json({ msg: "You cant bid your own product" });
+    return res.status(400).json({ error: "You cant bid your own product" });
   }
+
+
   Product.findOneAndUpdate(
     { _id: req.params.productId },
     {
@@ -413,6 +409,8 @@ exports.changependingstatus = (req, res) => {
   if (!cc) {
     return res.json("Product not found");
   }
+  const b=req.product.verifyThatBidIsAlreadyAccpeted(req.product.bid)
+  if(b) return res.status(400).json({error:"Product bid is already accpeted"})
   Product.findOneAndUpdate(
     {
       $and: [
@@ -460,16 +458,41 @@ exports.checkStatus = (req, res) => {
 
 //get all user's products
 exports.getUserProducts = (req, res) => {
-  var userBid=[];
- req.profile.userProducts.forEach((product)=>
- {
-   userBid= product.bid.filter((bid)=>
+  var userBid = [],flag=true;
+  if(req.profile.userProducts.length==0)
+  {
+    return res.status(404).json({error:"No Products Uploaded"})
+  }
+  req.profile.userProducts.forEach((product) => {
+    
+    if (product.bid.length == 0) {
+      product.bid.push({status:"No bids yet!"})
+      
+    }
+    else 
     {
-      return bid.status=="Pending"
-   })
-   product.bid=userBid;
- })
-  res.json({
-    products: req.profile.userProducts,
+      // looping in product bids to check accept status
+      for(const b of product.bid)
+      {
+        if(b.status=="Accepted")
+        {
+          product.bid.length=0
+          product.bid.push({status:"Bid is Accepted"})
+          flag=false
+        }
+      }
+    // filtring bid of pending status
+    if(flag)
+    {
+      userBid = product.bid.filter((bid) => {
+        return bid.status == "Pending";
+      });
+      
+          product.bid = userBid
+    }
+    }
   })
-}
+  return res.json({
+    products: req.profile.userProducts,
+  });
+};

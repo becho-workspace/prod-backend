@@ -137,6 +137,16 @@ productSchema.methods = {
     }
     return false;
   },
+  verifyThatBidIsAlreadyAccpeted: function(bid)
+  {
+     for (const b of bid) {
+       if(b.status=="Accepted")
+       {
+         return true
+       }
+     }
+     
+  }
 };
 
 module.exports = mongoose.model("Product", productSchema);

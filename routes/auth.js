@@ -26,6 +26,9 @@ router.post(
     .isLength({min:10 , max:10}),
     check("city")
     .trim()
+    .not().isEmpty(),
+    check("address")
+    .trim()
     .not().isEmpty()
 
   ],
