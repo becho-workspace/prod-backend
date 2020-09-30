@@ -129,12 +129,10 @@ userSchema.methods = {
       askedprice: askedprice,
     });
     this.save()
-      .then((data) => {
-
-        
+      .then((data) => {        
         if (!!data) {
           const msg = "Bidding Done";
-          return res.status(200).json(msg);
+          return res.status(200).json({msg});
         }
       })
       .catch((err) => res.status(500).json({ msg: "error in saving bid" }));
