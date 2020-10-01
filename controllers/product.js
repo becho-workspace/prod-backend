@@ -4,6 +4,11 @@ const _ = require("lodash");
 const fs = require("fs");
 const User = require("../models/user");
 const { queryCheck } = require("../util/util");
+const aws = require('aws-sdk');
+const s3 = new aws.S3({
+  secretAccessKey:process.env.SECRET_ACCESS_KEY,
+   accessKeyId:process.env.ACCESS_KEY_ID
+}); 
 
 exports.getProductById = (req, res, next, id) => {
   Product.findById(id).exec((err, product) => {
@@ -113,7 +118,23 @@ exports.photo = (req, res, next) => {
 
 // delete controllers
 exports.deleteProduct = (req, res) => {
-  let product = req.product;
+  const key=req.product.photo.path.split("/")[3];
+  console.log(key)
+  var params=
+    {  
+      Bucket: "bechho-image", 
+      Key: key
+    }
+  s3.deleteObject(params,(err,data)=>{
+     if(err)
+     {
+      return  res.status(500).json(
+         {
+           error:"Server error"
+         }
+       )
+     }
+     let product = req.product;
   product.remove((err, deletedProduct) => {
     if (err) {
       return res.status(400).json({
@@ -128,13 +149,14 @@ exports.deleteProduct = (req, res) => {
           error: "Failed to save the product",
         });
       }
-      deletedProduct.photo = undefined;
-      res.json({
-        message: "Deletion was a success",
-        deleteProduct: deletedProduct,
-      });
+       deletedProduct.photo = undefined;
+         res.json({
+           message: "Deletion was a success",
+           deleteProduct: deletedProduct
+         });
     });
   });
+   })
 };
 
 // delete controllers
