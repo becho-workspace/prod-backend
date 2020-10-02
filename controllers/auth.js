@@ -30,6 +30,7 @@ exports.signup = (req, res) => {
       name: user.name,
       email: user.email,
       id: user._id
+     city: user.city
     });
   });
 };
