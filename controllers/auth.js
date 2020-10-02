@@ -29,7 +29,8 @@ exports.signup = (req, res) => {
    return res.json({
       name: user.name,
       email: user.email,
-      id: user._id
+      id: user._id,
+     city: user.city
     });
   });
 };
