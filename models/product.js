@@ -101,6 +101,7 @@ const productSchema = new mongoose.Schema(
     },
     ans8: {
       type: String,
+    },
     ans10: {
     },
     ans11: {

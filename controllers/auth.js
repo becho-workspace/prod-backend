@@ -30,7 +30,6 @@ exports.signup = (req, res) => {
       name: user.name,
       email: user.email,
       id: user._id
-     city: user.city
     });
   });
 };
@@ -64,8 +63,8 @@ exports.signin = (req, res) => {
     res.cookie("token", token, { expire: new Date() + 9999 });
 
     //send response to front end
-    const { _id, name, email, role, mybids } = user;
-    return res.json({ token, user: { _id, name, email, role, mybids } }); });
+    const { _id, name, email, role, mybids,city } = user;
+    return res.json({ token, user: { _id, name, email, role, mybids,city } }); });
 };
 
 exports.signout = (req, res) => {

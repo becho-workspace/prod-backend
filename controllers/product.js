@@ -63,7 +63,7 @@ exports.createProduct = (req, res) => {
     !ans8||
     !ans9||
     !ans10||
-    !ans11||
+    !ans11
   ) {
     return res.status(400).json({
       error: "Please include all fields",
