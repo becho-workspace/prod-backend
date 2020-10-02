@@ -80,49 +80,31 @@ const productSchema = new mongoose.Schema(
     },
     ans1: {
       type: String,
-      required: true,
     },
     ans2: {
       type: String,
-      required: true,
     },
     ans3: {
       type: String,
-      required: true,
     },
     ans4: {
-      required: true,
       type: String,
     },
     ans5: {
-      required: true,
       type: String,
-      default: "Null",
     },
     ans6: {
-      required: true,
       type: String,
     },
     ans7: {
-      required: true,
       type: String,
     },
     ans8: {
       type: String,
-      default: "Null",
-    },
-    ans9: {
-      required: true,
-      type: String,
-    },
     ans10: {
-      required: true,
-      type: String,
     },
     ans11: {
-      required: true,
       type: String,
-      default: "Null",
     },
   },
   { timestamps: true }
