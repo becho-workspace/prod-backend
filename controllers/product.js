@@ -498,7 +498,7 @@ exports.getUserProducts = (req, res) => {
   req.profile.userProducts.forEach((product) => {
     
     if (product.bid.length == 0) {
-      product.bid.push({status:"No bids yet!"})
+      product.bid.push({status:"No bids"})
       
     }
     else 
@@ -509,7 +509,7 @@ exports.getUserProducts = (req, res) => {
         if(b.status=="Accepted")
         {
           product.bid.length=0
-          product.bid.push({status:"Bid is Accepted"})
+          product.bid.push({status:"Accepted"})
           flag=false
         }
       }
