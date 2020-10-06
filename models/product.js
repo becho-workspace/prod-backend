@@ -102,7 +102,11 @@ const productSchema = new mongoose.Schema(
     ans8: {
       type: String,
     },
+    ans9: {
+      type: String,
+    },
     ans10: {
+      type: String,
     },
     ans11: {
       type: String,
