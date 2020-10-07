@@ -75,6 +75,14 @@ router.get(
 
 router.get("/products/categories", isSignedIn, getAllUniqueCategories);
 
+router.get(
+  "/product/stopmbid/:productId/:userId",
+  isSignedIn,
+  isAuthenticated,
+  noMultipleBidding,
+);
+
+
 //bidding routes
 
 //bid a product
