@@ -393,6 +393,24 @@ exports.getbids = (req, res) => {
   });
 };
 
+
+exports.noMultipleBidding = (req, res) => {
+  Product.find({ _id: req.params.productId, },
+    { bid: { $elemMatch: { userBidding: req.params.userId, status: "Rejected" } } },
+    // "bid.userBidding": req.params.userId, "bid.status": "Rejected" }),
+    {
+      "bid": 1,
+    },
+    (err, result) => {
+      if (err) return res.json("Something went wrong");
+      if (result[0].bid.length === 0) {
+        return res.send("1");
+      }
+      return res.send("0");
+    });
+}
+
+
 //bid a product
 
 exports.bidding = (req, res) => {
