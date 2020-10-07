@@ -496,7 +496,8 @@ exports.getUserProducts = (req, res) => {
     return res.status(404).json({error:"No Products Uploaded"})
   }
   req.profile.userProducts.forEach((product) => {
-    
+    // resetting the flag
+    flag=true
     if (product.bid.length == 0) {
       product.bid.push({status:"No bids"})
       
@@ -519,7 +520,6 @@ exports.getUserProducts = (req, res) => {
       userBid = product.bid.filter((bid) => {
         return bid.status == "Pending";
       });
-      
           product.bid = userBid
     }
     }
