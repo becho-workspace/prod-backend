@@ -18,6 +18,7 @@ const {
   changependingstatus,
   countProducts,
   checkStatus,
+  noMultipleBidding,
 } = require("../controllers/product");
 const {
   isSignedIn,
@@ -79,9 +80,8 @@ router.get(
   "/product/stopmbid/:productId/:userId",
   isSignedIn,
   isAuthenticated,
-  noMultipleBidding,
+  noMultipleBidding
 );
-
 
 //bidding routes
 
