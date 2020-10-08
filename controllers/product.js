@@ -396,7 +396,7 @@ exports.getbids = (req, res) => {
 
 exports.noMultipleBidding = (req, res) => {
   Product.find({ _id: req.params.productId, },
-    { bid: { $elemMatch: { userBidding: req.params.userId, status: "Rejected" } } },
+    { bid: { $elemMatch: { userBidding: req.params.userId,  } } },
     // "bid.userBidding": req.params.userId, "bid.status": "Rejected" }),
     {
       "bid": 1,
