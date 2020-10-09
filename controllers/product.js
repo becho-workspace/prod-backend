@@ -395,18 +395,21 @@ exports.getbids = (req, res) => {
 
 
 exports.noMultipleBidding = (req, res) => {
-  Product.find({ _id: req.params.productId, },
-    { bid: { $elemMatch: { userBidding: req.params.userId, status: "Rejected" } } },
-    // "bid.userBidding": req.params.userId, "bid.status": "Rejected" }),
-    {
-      "bid": 1,
-    },
+  Product.find({
+    _id: req.params.productId,
+    "bid.userBidding": req.params.userId,
+  },
     (err, result) => {
       if (err) return res.json("Something went wrong");
-      if (result[0].bid.length === 0) {
-        return res.send("1");
+      for (var i = 0; i < result[0].bid.length; i++) {
+        if (result[0].bid[i].userBidding == req.params.userId) {
+          var st = result[0].bid[i].status;
+          if (st == "Pending") {
+            return res.send("0");
+          }
+        }
       }
-      return res.send("0");
+      return res.send("1");
     });
 }
 
