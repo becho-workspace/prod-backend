@@ -450,6 +450,7 @@ exports.bidding = (req, res) => {
         req.params.productId,
         req.body.offeredprice,
         req.body.askedprice,
+        req.body.status,
         res
       );
     }
@@ -468,7 +469,7 @@ exports.changependingstatus = (req, res) => {
     {
       $and: [
         { _id: req.params.productId },
-        { bid: { $elemMatch: { userBidding: req.params.biduserId } } },
+        { bid: { $elemMatch: { _id:req.body.bidId } } },
       ],
     },
     {
@@ -478,12 +479,13 @@ exports.changependingstatus = (req, res) => {
     },
     { new: true, useFindAndModify: false },
     (err, result) => {
-      if (err) return res.status(500).json({ msg: err });
-      if (!result) return res.status(404).json("Not found");
+      if (err) return res.status(500).json({ error: "Something went wrong in server" });
+      if (!result) return res.status(404).json({error:"No such bid found in DB"});
       User.updateStatus(
         req.params.biduserId,
         req.params.productId,
         req.body.status,
+        req.body.offeredprice,
         res
       );
     }

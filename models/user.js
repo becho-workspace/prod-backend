@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const uuidv1 = require("uuid/v1");
+const { json } = require("body-parser");
 
 const statuses = Object.freeze({
   0: "Rejected",
@@ -60,7 +61,6 @@ var userSchema = new mongoose.Schema(
     },
     mybids: [
       {
-        
         askedprice:Number,
         productId: String,
         bidOffer: Number,
@@ -122,11 +122,12 @@ userSchema.methods = {
       return "";
     }
   },
-  addBid: function (productId, offeredprice, askedprice, res) {
+  addBid: function (productId, offeredprice, askedprice,status,res) {
     this.mybids.push({
       bidOffer: offeredprice,
       productId,
       askedprice: askedprice,
+      status
     });
     this.save()
       .then((data) => {        
@@ -138,26 +139,23 @@ userSchema.methods = {
       .catch((err) => res.status(500).json({ msg: "error in saving bid" }));
   },
 };
-userSchema.statics.updateStatus = function (biderId, productId, status, res) {
+userSchema.statics.updateStatus = function (biderId, productId, status, bidOffer,res) {
   this.findOneAndUpdate(
-    { _id: biderId, "mybids.productId": productId },
+    {_id: biderId,mybids:{$elemMatch:{bidOffer,productId,status:"Pending"}}},
     {
-      $set: {
-        "mybids.$.status": status,
-      },
-    },
-    { new: true, useFindAndModify: false }
+      "mybids.$.status":status
+    },{useFindAndModify: false}
   )
-    .exec()
     .then((data) => {
-      if (!!data) {
-        return res.json({ status });
-      }
-      return res.json({ msg: "Failed to changed status" });
+        if(!!data)
+        {
+          return res.json({status})
+        }
+        return res.status(404).json({error:"Not Found in user schema"})
     })
-    .catch((err) => {
-      console.log(err);
-      return res.status(500).json({ msg: "Failed to changed status" });
+    .catch((error) => {
+      // console.log(err);
+      return res.status(500).json({error});
     });
 };
 
