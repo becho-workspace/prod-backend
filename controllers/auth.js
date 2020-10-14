@@ -19,11 +19,11 @@ exports.signup = (req, res) => {
       if(err.code)
       {
         return res.status(409).json({
-          err: "Email already register"
+          error: "Email already register"
         });
       }
       return res.status(400).json({
-        err: "NOT able to save user in DB"
+        error: "NOT able to save user in DB"
       });
     }
    return res.json({
@@ -43,7 +43,6 @@ exports.signin = (req, res) => {
       error: errors.array()[0].msg
     });
   }
-
   User.findOne({ email }, (err, user) => {
     if (err || !user) {
       return res.status(400).json({

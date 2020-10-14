@@ -1,7 +1,8 @@
 const Transaction = require("../models/transaction")
 
-
 exports.transList = (req, res) => {
+    const b=req.product.verifyThatBidIsAlreadyAccpeted(req.product.bid)
+    if(b) return res.status(400).json({error:"Product bid is already accpeted"})
     const trans = Transaction({
         buyerId: req.params.biduserId,
         buyerName: req.bidprofile.name,
@@ -25,7 +26,7 @@ exports.transList = (req, res) => {
         return res.status(200).json({ msg: "Succesfull" });
     })
         .catch((err) => {
-            res.status(403).json({ msg: err })
+            res.status(403).json({ error: "Not able to save current transction" })
         })
 }
 
