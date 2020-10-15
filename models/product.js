@@ -126,14 +126,18 @@ productSchema.methods = {
     }
     return false;
   },
-  verifyThatBidIsAlreadyAccpeted: function(bid)
+  verifyThatBidIsAlreadyAccpeted: function(bid,status)
   {
-     for (const b of bid) {
+    
+    if(status.match(/accepted/i))
+    { for (const b of bid) {
        if(b.status=="Accepted")
        {
          return true
        }
      }
+    }
+      return false
      
   }
 };
