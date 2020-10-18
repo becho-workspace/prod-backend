@@ -425,7 +425,7 @@ exports.bidding = (req, res) => {
   // user itself can't bid on its on product
   const a = req.product.assureBid(req.params.userId);
   if (a) {
-    return res.status(400).json({ error: "You cant bid your own product" });
+    return res.status(400).json({ error:"You cannot bid on your own product" });
   }
 
 
@@ -463,8 +463,8 @@ exports.changependingstatus = (req, res) => {
   if (!cc) {
     return res.json("Product not found");
   }
-  const b=req.product.verifyThatBidIsAlreadyAccpeted(req.product.bid)
-  if(b) return res.status(400).json({error:"Product bid is already accpeted"})
+  const b=req.product.verifyThatBidIsAlreadyAccpeted(req.product.bid,req.body.status)
+  if(b) return res.status(400).json({error:"You cannot accept more than one bid"})
   Product.findOneAndUpdate(
     {
       $and: [

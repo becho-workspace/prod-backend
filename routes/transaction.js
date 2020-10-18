@@ -11,6 +11,6 @@ router.param("userId", getUserById);
 router.param("productId", getProductById);
 router.param("biduserId", getBidderUserById);
 
-router.post("/addtrans/:userId/:biduserId/:productId",transList,isAuthenticated);
+router.post("/addtrans/:userId/:biduserId/:productId",isSignedIn,isAuthenticated,transList);
 
 module.exports = router;
